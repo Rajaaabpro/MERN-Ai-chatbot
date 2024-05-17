@@ -35,8 +35,8 @@ export const userSignup = async (
       const user = new User({name, email , password: hashedpassword });
       await user.save();
       
-      //  create token and store cookie 
-
+      //  create token and store cookie
+    
       res.clearCookie(COOKIE_NAME, {
         httpOnly: true,
         domain: "localhost",
@@ -84,7 +84,7 @@ export const userLogin = async (
     }
 
     //  create token and store cookie 
-    
+
     res.clearCookie(COOKIE_NAME, {
       httpOnly: true,
       domain: "localhost",
