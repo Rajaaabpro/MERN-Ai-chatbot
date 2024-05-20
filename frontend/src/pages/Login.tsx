@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { BiBorderRadius } from "react-icons/bi";
+import CustomizedInput from "../components/shared/CustomizedInput";
 
 const Login = () => {
   return (
@@ -40,6 +41,12 @@ const Login = () => {
               fontWeight={600}
             >
               Login
+              <CustomizedInput type="email" name="email" label="Email" />
+              <CustomizedInput
+                type="password"
+                name="password"
+                label="Password"
+              />
             </Typography>
           </Box>
         </form>
