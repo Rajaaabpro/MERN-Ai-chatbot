@@ -4,7 +4,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: rgb(134, 43, 43);
+  background-color: rgb(201, 187, 187);
   color: rgb(255, 255, 255);
   font-family: "Roboto Slab", se;
 }
@@ -17,4 +17,8 @@ nav-link {
   border-radius: 10px;
   text-decoration: none;
   letter-spacing: 1px;
+}
+.MuiOutlinedInput-input-root.Mui-focused,
+.MuiOutlinedInput-notchedoutline {
+  border-color: white !important;
 }
