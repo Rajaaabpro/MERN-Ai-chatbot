@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { loginUser } from "../helpers/api-communicators";
 
 type User = {
   name: string;
@@ -26,7 +27,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // fetch if the user's cookies are valid then skip login
   }, []);
-  const login = async (email: string, password: string) => {};
+  const login = async (email: string, password: string) => {
+    const data = await loginUser(email, password);
+    if (data) {
+      setUser({ email: data.email, name: data.name });
+      setIsLoggedIn(true);
+    }
+  };
   const signup = async (email: string, password: string) => {};
   const logout = async () => {};
   const value = {
