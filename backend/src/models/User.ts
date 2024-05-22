@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import { randomUUID } from "crypto";
-
 const chatSchema = new mongoose.Schema({
   id: {
     type: String,
@@ -10,17 +9,15 @@ const chatSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  contenr: {
+  content: {
     type: String,
     required: true,
   },
 });
-import { RequiredError } from "openai/dist/base.js";
-
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    Required: true,
+    required: true,
   },
   email: {
     type: String,
