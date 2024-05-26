@@ -9,7 +9,7 @@ import {
   deleteUserChats,
   getUserChats,
   sendChatRequest,
-} from "../helpers/api-communicator";
+} from "../helpers/api-communicators";
 import toast from "react-hot-toast";
 type Message = {
   role: "user" | "assistant";
