@@ -1,73 +1,66 @@
-import React from "react";
-import { Box, Avatar, Typography, Button } from "@mui/material";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Box, Avatar, Typography, Button, IconButton } from "@mui/material";
 import red from "@mui/material/colors/red";
 import { useAuth } from "../context/AuthContext";
-
-const chatMessages = [
-  {
-    role: "Assistant",
-    content: "Hello! How can I assist you today?",
-  },
-  {
-    role: "User",
-    content: "I need help with my homework.",
-  },
-  {
-    role: "Assistant",
-    content: "Sure, I'd be happy to help! What subject are you working on?",
-  },
-  {
-    role: "User",
-    content: "I'm struggling with math, specifically algebra.",
-  },
-  {
-    role: "Assistant",
-    content: "Alright, let's tackle it together. What algebra problem are you working on?",
-  },
-  {
-    role: "User",
-    content: "I don't understand how to solve equations with variables on both sides.",
-  },
-  {
-    role: "Assistant",
-    content: "To solve equations with variables on both sides, you need to get all the variables on one side and the constants on the other. Would you like a step-by-step example?",
-  },
-  {
-    role: "User",
-    content: "Yes, please!",
-  },
-  {
-    role: "Assistant",
-    content: "Sure thing! Let's solve the equation 3x + 2 = x + 10. First, subtract x from both sides to get the variables on one side: 3x - x + 2 = 10. What does that simplify to?",
-  },
-  {
-    role: "User",
-    content: "That simplifies to 2x + 2 = 10.",
-  },
-  {
-    role: "Assistant",
-    content: "Great! Now, subtract 2 from both sides to isolate the variable term: 2x = 8. What should you do next?",
-  },
-  {
-    role: "User",
-    content: "Divide both sides by 2 to get x by itself.",
-  },
-  {
-    role: "Assistant",
-    content: "Correct! So, x = 4. You've got it! Do you have any other questions about algebra?",
-  },
-  {
-    role: "User",
-    content: "No, that was very helpful. Thank you!",
-  },
-  {
-    role: "Assistant",
-    content: "You're welcome! If you have any more questions in the future, feel free to ask.",
-  },
-];
-
+import ChatItem from "../components/chat/ChatItem";
+import { IoMdSend } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
+import {
+  deleteUserChats,
+  getUserChats,
+  sendChatRequest,
+} from "../helpers/api-communicator";
+import toast from "react-hot-toast";
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+};
 const Chat = () => {
+  const navigate = useNavigate();
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const auth = useAuth();
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const handleSubmit = async () => {
+    const content = inputRef.current?.value as string;
+    if (inputRef && inputRef.current) {
+      inputRef.current.value = "";
+    }
+    const newMessage: Message = { role: "user", content };
+    setChatMessages((prev) => [...prev, newMessage]);
+    const chatData = await sendChatRequest(content);
+    setChatMessages([...chatData.chats]);
+    //
+  };
+  const handleDeleteChats = async () => {
+    try {
+      toast.loading("Deleting Chats", { id: "deletechats" });
+      await deleteUserChats();
+      setChatMessages([]);
+      toast.success("Deleted Chats Successfully", { id: "deletechats" });
+    } catch (error) {
+      console.log(error);
+      toast.error("Deleting chats failed", { id: "deletechats" });
+    }
+  };
+  useLayoutEffect(() => {
+    if (auth?.isLoggedIn && auth.user) {
+      toast.loading("Loading Chats", { id: "loadchats" });
+      getUserChats()
+        .then((data) => {
+          setChatMessages([...data.chats]);
+          toast.success("Successfully loaded chats", { id: "loadchats" });
+        })
+        .catch((err) => {
+          console.log(err);
+          toast.error("Loading Failed", { id: "loadchats" });
+        });
+    }
+  }, [auth]);
+  useEffect(() => {
+    if (!auth?.user) {
+      return navigate("/login");
+    }
+  }, [auth]);
   return (
     <Box
       sx={{
@@ -110,13 +103,14 @@ const Chat = () => {
             {auth?.user?.name.split(" ")[1][0]}
           </Avatar>
           <Typography sx={{ mx: "auto", fontFamily: "work sans" }}>
-            You are talking to a ChatBot
+            You are talking to a ChatBOT
           </Typography>
           <Typography sx={{ mx: "auto", fontFamily: "work sans", my: 4, p: 3 }}>
-            You can ask some questions related to Knowledge, Business,
-            Advices,Education, etc. But avoid sharing personal information
+            You can ask some questions related to Knowledge, Business, Advices,
+            Education, etc. But avoid sharing personal information
           </Typography>
           <Button
+            onClick={handleDeleteChats}
             sx={{
               width: "200px",
               my: "auto",
@@ -144,12 +138,11 @@ const Chat = () => {
       >
         <Typography
           sx={{
-            textAlign: "center",
             fontSize: "40px",
             color: "white",
             mb: 2,
             mx: "auto",
-            fontWeight: 600,
+            fontWeight: "600",
           }}
         >
           Model - GPT 3.5 Turbo
@@ -166,34 +159,40 @@ const Chat = () => {
             overflowX: "hidden",
             overflowY: "auto",
             scrollBehavior: "smooth",
-            bgcolor: "rgb(34,34,34)",
-            p: 2,
           }}
         >
-          {chatMessages.map((message, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: message.role === "User" ? "flex-end" : "flex-start",
-                mb: 2,
-              }}
-            >
-              <Box
-                sx={{
-                  bgcolor: message.role === "User" ? "rgb(56,56,56)" : "rgb(43,43,43)",
-                  color: "white",
-                  p: 2,
-                  borderRadius: 3,
-                  maxWidth: "75%",
-                }}
-              >
-                <Typography>{message.content}</Typography>
-              </Box>
-            </Box>
+          {chatMessages.map((chat, index) => (
+            //@ts-ignore
+            <ChatItem content={chat.content} role={chat.role} key={index} />
           ))}
         </Box>
+        <div
+          style={{
+            width: "100%",
+            borderRadius: 8,
+            backgroundColor: "rgb(17,27,39)",
+            display: "flex",
+            margin: "auto",
+          }}
+        >
+          {" "}
+          <input
+            ref={inputRef}
+            type="text"
+            style={{
+              width: "100%",
+              backgroundColor: "transparent",
+              padding: "30px",
+              border: "none",
+              outline: "none",
+              color: "white",
+              fontSize: "20px",
+            }}
+          />
+          <IconButton onClick={handleSubmit} sx={{ color: "white", mx: 1 }}>
+            <IoMdSend />
+          </IconButton>
+        </div>
       </Box>
     </Box>
   );
