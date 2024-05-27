@@ -10,7 +10,7 @@ import {
   loginUser,
   logoutUser,
   signupUser,
-} from "../helpers/api-communicator";
+} from "../helpers/api-communicators";
 
 type User = {
   name: string;
